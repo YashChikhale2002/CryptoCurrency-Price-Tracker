@@ -4,7 +4,7 @@ import threading
 
 latest_prices = {}
 
-allowed_symbols = ["dogeusdt"]
+allowed_symbols = ["btcusdt"]
 
 def on_message(ws, message):
     try:

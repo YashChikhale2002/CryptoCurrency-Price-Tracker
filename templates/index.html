@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Header */
+        header {
+            background-color: #1f2937; /* Dark gray */
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+        }
+
+        .navbar h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #34d399; /* Teal */
+        }
+
+        .navbar p {
+            color: #d1d5db; /* Light gray */
+            font-size: 1rem;
+        }
+
+        /* Price List */
+        .price-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .price-item {
+            background-color: white;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .price-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .price-item img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+
+        .price-item .info {
+            flex: 1;
+            margin-left: 16px;
+        }
+
+        .price-item .info h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827; /* Dark gray */
+        }
+
+        .price-item .info p {
+            font-size: 0.875rem;
+            color: #6b7280; /* Medium gray */
+        }
+
+        .price-item .price {
+            text-align: right;
+        }
+
+        .price-item .price h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .price-item .price p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Price Change Styles */
+        .price-increase {
+            color: #16a34a !important; /* Green */
+            font-weight: bold;
+        }
+
+        .price-decrease {
+            color: #dc2626 !important; /* Red */
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1f2937; /* Dark gray */
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class=" font-sans">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 shadow-md">
+        <div class="navbar">
+            <h1>Crypto Tracker</h1>
+            <p>Real-time updates powered by Binance API</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <ul class="price-list">
+            {% for symbol in allowed_symbols %}
+            <!-- Crypto List Item -->
+            <li id="price-{{ symbol | upper }}" class="price-item transition-colors duration-500">
+                <div class="flex items-center">
+                    <div class=" p-2 rounded-full">
+                        <img src="
+                                {% if symbol == 'btcusdt' %}
+                                    https://cryptologos.cc/logos/bitcoin-btc-logo.png
+                                {% elif symbol == 'ethusdt' %}
+                                    https://cryptologos.cc/logos/ethereum-eth-logo.png
+                                {% elif symbol == 'dogeusdt' %}
+                                    https://cryptologos.cc/logos/dogecoin-doge-logo.png
+                                {% elif symbol == 'bnbusdt' %}
+                                    https://cryptologos.cc/logos/bnb-bnb-logo.png
+                                {% else %}
+                                    https://cryptologos.cc/logos/{{ symbol | lower }}-{{ symbol | lower }}-logo.png
+                                {% endif %}" alt="{{ symbol | upper }}">
+                    </div>
+                    <div class="info">
+                        <h4>{{ symbol | upper }}</h4>
+                        <p id="change-value-{{ symbol | upper }}" class="text-xs text-gray-500">Change: Loading...</p>
+                    </div>
+                </div>
+                <div class="price">
+                    <h4 id="price-value-{{ symbol | upper }}" class="text-lg font-bold">Loading...</h4>
+                    <p id="volume-value-{{ symbol | upper }}" class="text-xs text-gray-500">Volume: Loading...</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Crypto Tracker | All rights reserved</p>
+    </footer>
+
+    <!-- Socket.IO Script -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on("price_update", (data) => {
+            const { symbol, price, volume, change } = data;
+
+            // Ensure correct case matching
+            const upperSymbol = symbol.toUpperCase();
+
+            // Update DOM Elements
+            const priceDiv = document.getElementById(`price-${upperSymbol}`);
+            const priceValue = document.getElementById(`price-value-${upperSymbol}`);
+            const volumeValue = document.getElementById(`volume-value-${upperSymbol}`);
+            const changeValue = document.getElementById(`change-value-${upperSymbol}`);
+
+            if (priceValue && volumeValue && changeValue) {
+                const existingPrice = parseFloat(priceValue.textContent.replace(/[^0-9.-]+/g, ""));
+
+                priceValue.textContent = `$${price.toFixed(2)}`;
+                volumeValue.textContent = `Volume: ${volume.toFixed(2)}`;
+                changeValue.textContent = `Change: ${change.toFixed(2)}%`;
+
+                // Highlight Price Changes
+                if (existingPrice) {
+                    // Remove previous classes if present
+                    priceValue.classList.remove('price-increase', 'price-decrease');
+
+                    // Apply the new class based on the price change
+                    const changeClass = price > existingPrice ? 'price-increase' : 'price-decrease';
+                    priceValue.classList.add(changeClass);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

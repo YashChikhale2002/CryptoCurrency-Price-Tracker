@@ -4,7 +4,7 @@ This project is a cryptocurrency price tracker that provides real-time updates o
 
 ## Technologies Used
 
-- **Python**: v3.12.6.
+- **Python**: v3.9.12.
 - **Flask**: A micro web framework for Python.
 - **Flask-SocketIO**: Enables real-time communication between the client and server.
 - **Flask-WebSocket-Client**: A WebSocket client for Flask.

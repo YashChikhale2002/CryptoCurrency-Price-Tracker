@@ -1,32 +1,36 @@
-// Initialize SocketIO connection
 const socket = io();
+const currencySelector = document.getElementById('currency-selector');
+let selectedCurrency = 'USD';
 
 // Listen for price updates
 socket.on("price_update", (data) => {
     const { symbol, price, volume, change } = data;
 
-    // Update price in the DOM
-    const priceValue = document.getElementById(`price-value-${symbol}`);
-    const volumeValue = document.getElementById(`volume-value-${symbol}`);
-    const changeValue = document.getElementById(`change-value-${symbol}`);
+    const upperSymbol = symbol.toUpperCase();
+    const priceValue = document.getElementById(`price-value-${upperSymbol}`);
+    const volumeValue = document.getElementById(`volume-value-${upperSymbol}`);
+    const changeValue = document.getElementById(`change-value-${upperSymbol}`);
 
     if (priceValue && volumeValue && changeValue) {
-        const existingPrice = parseFloat(priceValue.textContent.replace(/[^0-9.-]+/g,""));
+        fetch(`/convert?amount=${price}&from=USD&to=${selectedCurrency}`)
+            .then((response) => response.json())
+            .then((converted) => {
+                const existingPrice = parseFloat(priceValue.textContent.replace(/[^0-9.-]+/g, ""));
+                const newPrice = converted.converted;
 
-        // Update price text
-        priceValue.textContent = `$${price.toFixed(5)}`;
-        volumeValue.textContent = `Volume: ${volume.toFixed(2)}`;
-        changeValue.textContent = `Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%`;
+                priceValue.textContent = `${selectedCurrency} ${newPrice.toFixed(2)}`;
+                volumeValue.textContent = `Volume: ${volume.toFixed(2)}`;
+                changeValue.textContent = `Change: ${change.toFixed(2)}%`;
 
-        // Change text color based on price change
-        if (existingPrice) {
-            if (price > existingPrice) {
-                priceValue.classList.remove('text-red-500');
-                priceValue.classList.add('text-green-500');
-            } else if (price < existingPrice) {
-                priceValue.classList.remove('text-green-500');
-                priceValue.classList.add('text-red-500');
-            }
-        }
+                if (existingPrice) {
+                    priceValue.classList.remove('price-increase', 'price-decrease');
+                    const changeClass = newPrice > existingPrice ? 'price-increase' : 'price-decrease';
+                    priceValue.classList.add(changeClass);
+                }
+            });
     }
+});
+
+currencySelector.addEventListener('change', (e) => {
+    selectedCurrency = e.target.value;
 });

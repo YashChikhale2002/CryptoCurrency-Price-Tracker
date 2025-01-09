@@ -9,18 +9,14 @@ import time
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Configuration
 COINMARKETCAP_API_KEY = "d2731549-19f8-405a-8017-6df613de03dd"
 allowed_symbols = ["dogeusdt", "btcusdt", "ethusdt", "bnbusdt", "xrpusdt", "solusdt"]
 
-# Shared dictionary for real-time prices
 latest_prices = {}
 
-# Cache configuration
 cache = {}
-cache_expiry = 300  # Cache expiry time in seconds (5 minutes)
+cache_expiry = 300  
 
-# Function to get conversion rate with caching
 def get_conversion_rate(from_currency, to_currency):
     key = f"{from_currency}_{to_currency}"
     if key in cache and time.time() - cache[key]["timestamp"] < cache_expiry:
@@ -38,15 +34,13 @@ def get_conversion_rate(from_currency, to_currency):
     else:
         raise Exception(f"API Error: {response.text}")
 
-# WebSocket Handlers
 def on_message(ws, message):
     try:
         data = json.loads(message)
         symbol = data["s"].lower()
-        price = float(data["c"])  # Current price
-        volume = float(data["v"])  # 24h trading volume
-        price_change = float(data["P"])  # 24h price change percentage
-
+        price = float(data["c"])  
+        volume = float(data["v"]) 
+        price_change = float(data["P"]) 
         latest_prices[symbol.upper()] = {
             "price": price,
             "volume": volume,
@@ -83,12 +77,10 @@ def start_websocket():
     ws.on_open = on_open
     ws.run_forever()
 
-# Start WebSocket in a separate thread
 ws_thread = threading.Thread(target=start_websocket)
 ws_thread.daemon = True
 ws_thread.start()
 
-# Currency conversion route using CoinMarketCap
 @app.route("/convert", methods=["GET"])
 def convert_currency():
     try:

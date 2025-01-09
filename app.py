@@ -11,7 +11,7 @@ socketio = SocketIO(app)
 
 # Configuration
 COINMARKETCAP_API_KEY = "d2731549-19f8-405a-8017-6df613de03dd"
-allowed_symbols = ["dogeusdt", "btcusdt", "ethusdt", "bnbusdt"]
+allowed_symbols = ["dogeusdt", "btcusdt", "ethusdt", "bnbusdt", "xrpusdt", "solusdt"]
 
 # Shared dictionary for real-time prices
 latest_prices = {}

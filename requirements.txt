@@ -1,5 +1,5 @@
 flask
 websocket-client
 flask-socketio
-eventlet  # For WebSocket support
+eventlet  
 requests

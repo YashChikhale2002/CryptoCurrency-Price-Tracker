@@ -62,6 +62,6 @@ This project is a cryptocurrency price tracker that provides real-time updates o
 6. Create a new Pull Request.
 
 
-## Contact
+docker build -t my-flask-app .
 
-For any questions or suggestions, please open an issue or contact the project maintainer at `your-email@example.com`.
+docker run -p 5000:5000 my-flask-app

@@ -74,3 +74,5 @@ To run the application using Docker, follow these steps:
     ```bash
     docker run -p 5000:5000 my-flask-app
     ```
+
+Open your web browser and navigate to `http://localhost:5000/` to view the application.

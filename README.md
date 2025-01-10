@@ -61,7 +61,16 @@ This project is a cryptocurrency price tracker that provides real-time updates o
 5. Push to the branch (`git push origin feature-branch`).
 6. Create a new Pull Request.
 
+## Docker
 
-docker build -t my-flask-app .
+To run the application using Docker, follow these steps:
 
-docker run -p 5000:5000 my-flask-app
+1. Build the Docker image:
+    ```bash
+    docker build -t my-flask-app .
+    ```
+
+2. Run the Docker container:
+    ```bash
+    docker run -p 5000:5000 my-flask-app
+    ```
